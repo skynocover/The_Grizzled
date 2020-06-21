@@ -1,0 +1,325 @@
+@import './reset.css'; /*可以讓ul 的小點消失*/
+
+.menu {
+     height: 700px;
+     width: 15%;
+     background-color: #7C7C7C;
+     float: left;
+}
+
+.menu ul li {
+    font-size: 1.3em;
+    font-weight :300;
+    padding: 10px 30px;
+    color: #ffffff;
+}
+
+.menu ul li:hover {
+    background-color: #e29e9e;
+    color: #4a4a4a; /*滑鼠過去改變顏色*/
+    transition: 0.25s; /*延遲變色,表示有過度*/
+}
+
+.menu .players {
+  font-size: 1.3em;
+    padding: 8px ;
+    color: #ffffff;
+    
+}
+.menu .players div{
+  width:  100%;
+  height: 60px;
+  display: inline-block;
+  margin-bottom:5px;
+}
+.menu .players div:hover{
+    background-color: #e29e9e;
+    color: #4a4a4a; /*滑鼠過去改變顏色*/
+    transition: 0.25s; /*延遲變色,表示有過度*/
+}
+.menu .players .player{
+  display: inline-block;
+  padding:5px;
+}
+.menu .players .player div{
+  height:37.5px;
+  width: 37.5px;
+  display: inline-block;
+  border-radius :25px;
+  background-size: auto 37.5px;
+}
+
+.menu .title .coffee {
+     background: url('../icon/coffee.jpg') no-repeat;
+     background-size: 150px auto; /*設定背景的高度,寬度自動*/
+     height: 150px;
+     width: 150px;
+     display: inline-block; /*讓文字與圖片並排*/
+     border-radius: 150px; /*讓圖片變圓形*/
+    margin:15px 15px; /*外距,或是設定外層title的內距*/
+}
+
+.title {
+     /*這邊的寬度100%是抓menu設定的寬度*/
+    
+     width: 100%;
+     height: 250px;
+    
+    /* padding: 20px 40px; 設定內距,使大頭照置中*/
+     /*設定底色為#4A4A4A*/
+     background-color: #4A4A4A;
+}
+
+
+
+/*menu link start*/
+
+.menu .link{ /*連結的標籤*/
+  width: 100%;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+ .menu .link div {
+    height: 50px;
+    width: 50px;
+    display: inline-block;
+
+    border: 1px solid #ffffff;
+    padding: 0px;
+    border-radius: 50px;
+    margin: 0px 0px;
+ }
+
+.menu .link .night {
+    background: url('../icon/night.png') no-repeat;
+    background-size: auto 50px;
+}
+
+.menu .link .snow{
+    background: url('../icon/snow.png') no-repeat;
+    background-size: auto 50px;
+}
+.menu .link .rain {
+    background: url('../icon/rain.png') no-repeat;
+    background-size: auto 50px;
+}
+.menu .link .bullet {
+    background: url('../icon/bullet.png') no-repeat;
+    background-size: auto 50px;
+}
+.menu .link .mask {
+    background: url('../icon/mask.png') no-repeat;
+    background-size: auto 50px;
+}
+.menu .link .whistle {
+    background: url('../icon/whistle.png') no-repeat;
+    background-size: auto 50px;
+     z-index:1;
+}
+
+.but{
+  position: absolute;
+}
+
+.link:hover .show {
+  animation: animationName 0.5s linear  forwards ;
+  -moz-animation: animationName 0.5s linear  forwards ;
+  -webkit-animation: animationName 0.5s linear  forwards;
+  -o-animation: animationName 0.5s linear  forwards;
+    opacity: 1;
+}
+
+.show{
+  opacity: 0;
+  background:url('https://image.flaticon.com/icons/svg/658/658360.svg') center no-repeat;
+  background-size:50px auto;
+  z-index:0;
+   margin-top:-100px;
+}
+@keyframes animationName {
+  0%{
+      opacity: 0;
+     margin-top:0px;
+  }
+  50%{
+      opacity: 1;
+    margin-top:-130px;
+  }
+  100%{
+    margin-top:-100px;
+  }
+}
+
+/*menu end*/
+
+/* in the content */
+
+.content {
+     width:100%;
+     height: 100vh;
+     background-color: rgb(123, 171, 216); 
+     
+}
+
+.content .banner {
+     width: 100%;/*設定寬度為100%*/
+     height: 700px;/*設定高度為300px*/
+     background-color: rgba(73, 67, 61, 0.226);
+}
+
+.content .banner .table{
+  background: url('../background.png') no-repeat;
+  background-size: auto 100%; /*設定背景的高度,寬度自動*/
+  height: 700px;
+  width: 1248px;
+  position: absolute;
+  display: inline-block; /*讓文字與圖片並排*/
+}
+
+
+.content .banner .pile div{
+  height: 165px;
+  width: 120px;
+  display: inline-block; /*讓文字與圖片並排*/
+  border-radius:10px;
+}
+
+.content .banner .pile .Trials{
+  background: url('../card/Peace.png') no-repeat;
+  background-size: auto 100%; /*設定背景的高度,寬度自動*/
+   margin-top:90px;
+  margin-left:415px;
+}
+
+.content .banner .pile .MoraleReserve{
+  position: absolute;
+  background: url('../card/Monument.png') no-repeat;
+  background-size: auto 100%; /*設定背景的高度,寬度自動*/
+   margin-top:95px;
+  margin-left: 200px;
+}
+
+.content .banner .noMansLand{
+  margin-top:160px;
+  margin-left:100px;
+}
+
+
+.content .banner .noMansLand div{
+  background-size: auto 100%; /*設定背景的高度,寬度自動*/
+  height: 200px;
+  width: 124px;
+  display: inline-block; /*讓文字與圖片並排*/
+  margin-left:20px ;
+  border-radius:10px;
+}
+
+
+.other {
+  display: inline-block;
+  width:15%;
+  position:absolute;
+}
+
+.support {
+  width: 100%;
+  background-color:rgb(46, 151, 185);
+  font-size: 1.3em;
+  color: #ffffff;
+  padding-top: 15px;
+  padding-bottom:10px ;
+  display: inline-block;
+}
+
+.support div{
+  margin-top:5px;
+  margin-left:5px;
+  height: 20px;
+  width: 60px;
+
+  border: 1px solid #ffffff;
+  color: #ebe954;
+  background-size: auto 100%;
+  vertical-align:bottom;
+  display:inline-block; 
+  padding-top: 40px;
+}
+
+.speech {
+  width: 100%;
+  background-color:rgb(35, 113, 139);
+  font-size: 1.3em;
+  color: #ffffff;
+  padding-top: 10px;
+  padding-bottom:6px ;
+  display: inline-block;
+}
+
+.speech div{
+  margin-top:5px;
+  margin-left:5px;
+  height: 30px;
+  width: 120px;
+
+  color: #eb5954;
+  background-size: auto 100%;
+  vertical-align:bottom;
+  display:inline-block; 
+  padding-top: 30px; 
+  opacity:0.8;
+}
+
+.content .hand{
+  display:inline-block;
+  margin-left: 15%;
+}
+
+.content .hand div{
+  background: url('../card/cardBack.png') no-repeat;
+  background-size: auto 100%; /*設定背景的高度,寬度自動*/
+  height: 200px;
+  width: 124px;
+  display: inline-block; /*讓文字與圖片並排*/
+  margin-top:10px;
+  margin-left:10px ;
+  border-radius:10px;
+}
+
+
+
+/*Restart button*/
+
+.menu .title .restart {
+  margin-left: 35px;
+  margin-right:35px;
+   background: #65a9d7;
+   background: -webkit-gradient(linear, left top, left bottom, from(#3e779d), to(#65a9d7));
+   background: -webkit-linear-gradient(top, #3e779d, #65a9d7);
+   background: -moz-linear-gradient(top, #3e779d, #65a9d7);
+   background: -ms-linear-gradient(top, #3e779d, #65a9d7);
+   background: -o-linear-gradient(top, #3e779d, #65a9d7);
+   padding: 8px 16px;
+   -webkit-border-radius: 9px;
+   -moz-border-radius: 9px;
+   border-radius: 9px;
+   -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   box-shadow: rgba(0,0,0,1) 0 1px 0;
+   text-shadow: rgba(0,0,0,.4) 0 1px 0;
+   color: #ffffff;
+   font-size: 18px;
+   font-family: Georgia, Serif;
+   text-decoration: none;
+   vertical-align: middle;
+   }
+.menu .title .restart:hover {
+   border-top-color: #28597a;
+   background: #28597a;
+   color: #ccc;
+   }
+.menu .title .restart:active {
+   border-top-color: #1b435e;
+   background: #1b435e;
+   }
