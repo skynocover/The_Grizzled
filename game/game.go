@@ -11,7 +11,6 @@ import (
 )
 
 var (
-	Hand    tOnhand
 	Game    Tgame
 	Players []player
 )
@@ -31,6 +30,7 @@ type Tgame struct {
 	Players   []string
 	Threats   [][]string
 	PlayerNow string
+	TM        [2]int
 }
 
 func (this *Tgame) Render() []byte {
@@ -47,6 +47,8 @@ func (this *Tgame) Render() []byte {
 		}
 	}
 	this.PlayerNow = Players[this.order].Name
+
+	this.TM = [2]int{this.trials.cards.Len(), this.morale.cards.Len()}
 
 	data, _ := json.Marshal(this)
 	return data
@@ -88,6 +90,9 @@ func (this *Tgame) noManStage() map[string]int { //回傳每種威脅數量的ma
 }
 
 func (this *Tgame) InitGame() {
+	this.trials = pile{}
+	this.morale = pile{}
+
 	/*  洗牌  */
 	allCard := 48
 	newCards := randCard(allCard)
@@ -111,7 +116,7 @@ func (this *Tgame) InitGame() {
 	support := randCard(16 - len(Players)*2)
 	for i := range Players {
 		Players[i].InitPlayer()
-		Players[i].TakeHero(hero[i] - 1)
+		Players[i].TakeHero(hero[i])
 		Players[i].takeSupport(support[i])
 	}
 

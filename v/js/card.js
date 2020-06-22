@@ -1,56 +1,52 @@
 var trial =	document.getElementById("trial"); 
+var morale =document.getElementById("morale"); 
 var restart = document.getElementById("restart"); 
 var hero = document.getElementById("hero");
 var stage = document.getElementById("stage");
 var speech = document.getElementById("speech");
-var me = document.getElementById("me")
+var me = document.getElementById("me");
 
-var hand0 = document.getElementById("hand0");
-var hand1 = document.getElementById("hand1");
-var hand2 = document.getElementById("hand2");
-var hand3 = document.getElementById("hand3");
-var hand4 = document.getElementById("hand4");
-var hand5 = document.getElementById("hand5");
-var hand6 = document.getElementById("hand6");
-var hand7 = document.getElementById("hand7");
+function getElementsByIdStartsWith(container, selectorTag, prefix) {
+    var items = [];
+    var myPosts = document.getElementById(container).getElementsByTagName(selectorTag);
+    for (var i = 0; i < myPosts.length; i++) {
+        if (myPosts[i].id.lastIndexOf(prefix, 0) === 0) {
+            items.push(myPosts[i]);
+        }
+	}
+    return items;
+}
 
-var hands = [hand0,hand1, hand2,hand3, hand4, hand5, hand6, hand7];
+hands = getElementsByIdStartsWith("hands", "div", "hand")
+for (let i = 0; i < hands.length; i++) {
+	hands[i].onclick= function () {
+		if (hands[i].style.backgroundImage.search("cardBack")==-1) {
+			let playCard = '{"order":"playCard","choose":"'+i+'"}';
+			w.send(playCard);
+		}
+	}
+}
 
-var Land0 = document.getElementById("Land0");
-var Land1 = document.getElementById("Land1");
-var Land2 = document.getElementById("Land2");
-var Land3 = document.getElementById("Land3");
-var Land4 = document.getElementById("Land4");
-var Land5 = document.getElementById("Land5");
-var Land6 = document.getElementById("Land6");
+Lands = getElementsByIdStartsWith("lands", "div", "Land")
+for (let i = 0; i < Lands.length; i++) {
+	Lands[i].onclick= function () {
+		if (stage.innerHTML=="幸運草") {
+			let lucky = '{"order":"luckyClover","choose":"'+i+'"}';
+			w.send(lucky)
+		}
+	}
+}
 
-var Lands = [Land0, Land1, Land2, Land3, Land4, Land5, Land6];
+supports = getElementsByIdStartsWith("supports", "div", "support")
+for (let i = 0; i < supports.length; i++) {
+	supports[i].onclick= function () {
+		let sup = '{"order":"support","choose":"'+i+'"}';
+		w.send(sup)
+	}
+}
 
-var support0 = document.getElementById("support0");
-var support1 = document.getElementById("support1");
-var support2 = document.getElementById("support2");
-var support3 = document.getElementById("support3");
-
-var supports = [support0, support1, support2, support3 ]
-
-
-var player0 = document.getElementById("player0");
-var player1 = document.getElementById("player1");
-var player2 = document.getElementById("player2");
-var player3 = document.getElementById("player3");
-var player4 = document.getElementById("player4");
-
-var players = [player0 ,player1, player2, player3,player4]
-
-
-var threat0 = document.getElementById("threat0");
-var threat1 = document.getElementById("threat1");
-var threat2 = document.getElementById("threat2");
-var threat3 = document.getElementById("threat3");
-var threat4 = document.getElementById("threat4");
-
-var threats = [threat0, threat1, threat2, threat3, threat4]
-
+players = getElementsByIdStartsWith("players", "span", "player")
+threats = getElementsByIdStartsWith("players", "div", "threat")
 
 w = new WebSocket("ws://" + HOST + "/my_endpoint");
 /*
@@ -72,7 +68,6 @@ w.onmessage = function (message) {
 			if (i < jsonArray["NoMansLand"].length) {
 				Lands[i].style = `background-image:url(./card/${jsonArray["NoMansLand"][i]["Name"]}.png);`;
 			}else{
-				console.log("fasdf")
 				Lands[i].style.backgroundImage = '';
 			}
 		}
@@ -93,9 +88,12 @@ w.onmessage = function (message) {
 		}
 
 		for (let i = 0; i < jsonArray["Players"].length;i++){
-			console.log(i)
 			players[i].innerHTML = jsonArray["Players"][i]
 		}
+
+		trialnum = jsonArray["TM"][0]
+		moralenum = jsonArray["TM"][1]
+
 		stage.innerHTML = jsonArray["Stage"]
 		if (jsonArray["Stage"]=="Start!") {
 			swal({
@@ -111,9 +109,13 @@ w.onmessage = function (message) {
 	}
 
 	if (jsonArray["Process"]=="hand") {
-
-		for (let i = 0; i < jsonArray["Handcard"].length; i++) {
-			hands[i].style = `background-image:url(./card/${jsonArray["Handcard"][i]["Name"]}.png);`;
+		
+		for (let i = 0; i<8; i++) {
+			if (i < jsonArray["Handcard"].length) {
+				hands[i].style = `background-image:url(./card/${jsonArray["Handcard"][i]["Name"]}.png);`;
+			}else{
+				hands[i].style = `background-image:url(./card/cardBack.png);`;
+			}
 		}
 		hero.style = `background-image:url(./hero/${jsonArray["Hero"]["Name"]}.png)`;
 		document.getElementById("speechNum").innerHTML="x"+jsonArray["SpeechTime"]
@@ -122,62 +124,27 @@ w.onmessage = function (message) {
 		support2.innerHTML = "x"+jsonArray["Support"]["Left2"]
 		support3.innerHTML = "x"+jsonArray["Support"]["Right2"]
 	}
-
-	
 };
 
+var trialnum = 0
 trial.onclick = function () {
+	swal({
+  		title: "考驗:"+trialnum,
+	});
+	/*
 	if (stage.innerHTML!="Waiting") {
 		let draw= '{"order":"draw"}';
 		w.send(draw)
 	}
+	*/
 }
 
-function playCard(card){
-	let playCard = '{"order":"playCard","choose":"'+card+'"}';
-	w.send(playCard);
+var moralenum = 0
+morale.onclick = function () {
+	swal({
+  		title: "士氣:"+moralenum,
+	});
 }
-
-hand0.onclick=function(){
-	if (this.style.backgroundImage.search("cardBack")==-1) {
-		playCard("0")
-	}
-}
-hand1.onclick = function () {
-	if (this.style.backgroundImage.search("cardBack")==-1) {
-		playCard("1")
-	}
-};
-hand2.onclick = function () {
-	if (this.style.backgroundImage.search("cardBack")==-1) {
-		playCard("2");
-	}
-};
-hand3.onclick = function () {
-	if (this.style.backgroundImage.search("cardBack")==-1) {
-		playCard("3")
-	}
-};
-hand4.onclick = function () {
-	if (this.style.backgroundImage.search("cardBack")==-1) {
-		playCard("4")
-	}
-};
-hand5.onclick = function () {
-	if (this.style.backgroundImage.search("cardBack")==-1) {
-		playCard("5")
-	}
-};
-hand6.onclick = function () {
-	if (this.style.backgroundImage.search("cardBack")==-1) {
-		playCard("6")
-	}
-};
-hand7.onclick = function () {
-	if (this.style.backgroundImage.search("cardBack")==-1) {
-		playCard("7")
-	}
-};
 
 hero.onclick = function () {
 	if (this.style.backgroundImage.search("used") == -1) {
@@ -186,42 +153,12 @@ hero.onclick = function () {
 	}
 }
 
-function lucky(land){
-	if (stage.innerHTML=="幸運草") {
-		let lucky = '{"order":"luckyClover","choose":"'+land+'"}';
-		w.send(lucky)
-	}
-}
-
-Land0.onclick = function () {
-	lucky(0)
-};
-Land1.onclick = function () {
-	lucky(1)
-};
-Land2.onclick = function () {
-	lucky(2)
-};
-Land3.onclick = function () {
-	lucky(3)
-};
-Land4.onclick = function () {
-	lucky(4)
-};
-Land5.onclick = function () {
-	lucky(5)
-};
-Land6.onclick = function () {
-	lucky(6)
-};
-
 restart.onclick = function () {
 	let restart= '{"order":"restart"}';
 	w.send(restart);
 }
 
 speech.onclick = function () {
-
 	swal("選擇一個威脅", {
   		buttons: {
   			cancel: "Cancel!",

@@ -51,14 +51,14 @@ func main() {
 	ws := websocket.New(websocket.DefaultGorillaUpgrader, websocket.Events{
 		websocket.OnNativeMessage: func(nsConn *websocket.NSConn, msg websocket.Message) error {
 			log.Printf("Server got: %s from [%s]", msg.Body, nsConn.Conn.ID())
-			
+
 			var request Request
 			json.Unmarshal(msg.Body, &request)
 
 			receive := request.Order
 			switch receive {
 			case "draw":
-				Game.Draw(nsConn.Conn.ID(),6)
+				Game.Draw(nsConn.Conn.ID(), 6)
 				msg.Body = Players[GetOrder(nsConn.Conn.ID())].Render()
 				nsConn.Conn.Write(msg)
 
@@ -71,9 +71,8 @@ func main() {
 				nsConn.Conn.Write(msg)
 				nsConn.Conn.Server().Broadcast(nsConn, msg)
 
-
 			case "heroUse":
-				if Players[0].PlayHero() {
+				if Players[GetOrder(nsConn.Conn.ID())].PlayHero() {
 					msg.Body = Players[GetOrder(nsConn.Conn.ID())].Render()
 					nsConn.Conn.Write(msg)
 				}
@@ -107,7 +106,6 @@ func main() {
 				nsConn.Conn.Write(msg)
 				msg.Body = Game.Render()
 				nsConn.Conn.Write(msg)
-
 				nsConn.Conn.Server().Broadcast(nsConn, msg)
 
 			case "login":

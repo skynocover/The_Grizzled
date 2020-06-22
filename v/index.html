@@ -11,9 +11,11 @@
                     content: "input",
                 })
                 .then((value) => {
-                    let speech = '{"order":"login","choose":"'+value+'"}';
-                    me.value = value;
-	                w.send(speech);
+                    if (value!="") {
+                         let speech = '{"order":"login","choose":"'+value+'"}';
+                        me.innerHTML = value;
+	                    w.send(speech);
+                    }
                 });
             }
         }
@@ -32,7 +34,7 @@
         <div id="restart" class="restart">Restart</div>
         <div id="stage" class="restart">Waiting</div>
     </div>
-    <div class="players">
+    <div id="players" class="players">
         <div id="threat0" class="player">
             <span id="player0">Player0</span>
             <br>
@@ -85,9 +87,9 @@
             
             <div class="pile">
                 <div id="trial" class="Trials"></div>
-                <div class="MoraleReserve"></div>
+                <div id="morale" class="MoraleReserve"></div>
             </div> 
-            <div class="noMansLand">
+            <div id="lands" class="noMansLand">
                 <!--<div style="background-image:url(./card/Bullet_Mask.png);"></div>-->
                 <div id="Land0" ></div>
                 <div id="Land1" ></div>
@@ -97,11 +99,11 @@
                 <div id="Land5" ></div>
                 <div id="Land6" ></div>
             </div> 
-        </div><!--放置圖大頭照的div區塊-->
+        </div>
         
     </div>
     <div class="other">
-        <div class="support">
+        <div id="supports" class="support">
             <span>支援</span><br>
             <div id="support0" style="background-image:url(./icon/support_left.png);">x0</div>
             <div id="support1" style="background-image:url(./icon/support_right.png);">x0</div>
@@ -115,7 +117,7 @@
         </div>
     </div>
     
-    <div class="hand">
+    <div id="hands" class="hand">
         <div id="hand0"></div>
         <div id="hand1"></div>
         <div id="hand2"></div>

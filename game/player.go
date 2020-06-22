@@ -1,20 +1,20 @@
 package game
 
 import (
-	"grizzled/database"
 	"encoding/json"
+	"grizzled/database"
 	//"strings"
 	//"fmt"
 )
 
 type player struct {
-	Id       string
-	Name     string
-	Handcard []database.Card
-	Hero     database.Hero
-	Support  supports
-	SpeechTime   int
-	threat   []string
+	Id         string
+	Name       string
+	Handcard   []database.Card
+	Hero       database.Hero
+	Support    supports
+	SpeechTime int
+	threat     []string
 	/* Render */
 	Process string
 }
@@ -26,7 +26,7 @@ type supports struct {
 	Right2 int
 }
 
-func (this *player)Render()[]byte{
+func (this *player) Render() []byte {
 	this.Process = "hand"
 
 	data, _ := json.Marshal(this)
@@ -36,7 +36,7 @@ func (this *player)Render()[]byte{
 func (this *player) InitPlayer() {
 	this.Handcard = []database.Card{}
 	this.Hero = database.Hero{}
-	this.Support = supports{Left:1,Right:1}
+	this.Support = supports{Left: 1, Right: 1}
 	this.SpeechTime = 0
 	this.threat = []string{}
 }
