@@ -11,6 +11,7 @@ import (
 )
 
 var (
+	Round   tRound
 	Game    Tgame
 	Players []player
 )
@@ -25,12 +26,13 @@ type Tgame struct {
 	morale     pile
 	order      int
 	Stage      string
+	speech     int
 	/* render用*/
-	Process   string
-	Players   []string
-	Threats   [][]string
-	PlayerNow string
-	TM        [2]int
+	Process string
+	Players []string
+	Threats [][]string
+	//PlayerNow string
+	TM [2]int //兩個牌組的數量
 }
 
 func (this *Tgame) Render() []byte {
@@ -46,19 +48,12 @@ func (this *Tgame) Render() []byte {
 			this.Threats[i] = append(this.Threats[i], Players[i].threat[j])
 		}
 	}
-	this.PlayerNow = Players[this.order].Name
+	//this.PlayerNow = Players[this.order].Name
 
 	this.TM = [2]int{this.trials.cards.Len(), this.morale.cards.Len()}
 
 	data, _ := json.Marshal(this)
 	return data
-}
-
-func (this *Tgame) GameNext() {
-	this.order = this.order + 1
-	if this.order == len(Players) {
-		this.order = this.order - len(Players)
-	}
 }
 
 func (this *Tgame) noManStage() map[string]int { //回傳每種威脅數量的map
@@ -90,6 +85,7 @@ func (this *Tgame) noManStage() map[string]int { //回傳每種威脅數量的ma
 }
 
 func (this *Tgame) InitGame() {
+	this.speech = 5
 	this.trials = pile{}
 	this.morale = pile{}
 
@@ -153,16 +149,6 @@ func (this *Tgame) checkLand(choose int, handle string) bool {
 		return true
 	}
 	return false
-}
-
-func (this *Tgame) Draw(id string, num int) {
-	for j := 0; j < num; j++ {
-		if this.trials.cards.Empty() {
-			return
-		}
-		Players[GetOrder(id)].drawCard(this.trials.cards.Pop().(database.Card))
-	}
-	this.Stage = "Draw Card"
 }
 
 func (this *Tgame) admission(card database.Card) {

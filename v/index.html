@@ -6,13 +6,13 @@
     <link rel="stylesheet" href="./css/style.css">
      <script>
         function login(){
-            if (document.getElementById("stage").innerHTML=="Waiting") {
-                swal("Write something here:", {
+            if (document.getElementById("stage").innerHTML=="Waiting" && document.getElementById("me").innerHTML=="") {
+                swal("請輸入玩家名稱:", {
                     content: "input",
                 })
                 .then((value) => {
                     if (value!="") {
-                         let speech = '{"order":"login","choose":"'+value+'"}';
+                        let speech = '{"order":"login","choose":"'+value+'"}';
                         me.innerHTML = value;
 	                    w.send(speech);
                     }

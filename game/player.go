@@ -15,6 +15,7 @@ type player struct {
 	Support    supports
 	SpeechTime int
 	threat     []string
+	status string
 	/* Render */
 	Process string
 }
@@ -38,6 +39,7 @@ func (this *player) InitPlayer() {
 	this.Hero = database.Hero{}
 	this.Support = supports{Left: 1, Right: 1}
 	this.SpeechTime = 0
+	this.takeSpeech()
 	this.threat = []string{}
 }
 
@@ -64,16 +66,19 @@ func (this *player) takeSupport(support int) {
 	}
 }
 
+func (this *player) takeSpeech() {
+	if Game.speech > 0 {
+		Game.speech--
+		this.SpeechTime++
+	}
+}
+
 func (this *player) drawCard(card database.Card) {
 	this.Handcard = append(this.Handcard, card)
 }
 
-func (this *player) PlayCard(choose int) {
-	/*
-		if len(this.handcard) == 0 || len(this.handcard) < choose+1 {
-			return
-		}
-	*/
+func (this *player) playCard(choose int) {
+
 	if this.Handcard[choose].HardKnock == true {
 		this.hardKnock(this.Handcard[choose])
 	} else {
@@ -82,7 +87,7 @@ func (this *player) PlayCard(choose int) {
 
 	if this.Handcard[choose].Trap == true && !Game.trials.cards.Empty() {
 		this.Handcard = append(this.Handcard, Game.trials.cards.Pop().(database.Card))
-		this.PlayCard(len(this.Handcard) - 1)
+		this.playCard(len(this.Handcard) - 1)
 	}
 
 	for i := choose; i < len(this.Handcard)-1; i++ {
@@ -97,24 +102,10 @@ func (this *player) TakeHero(num int) {
 	database.DB.Where("ID=?", num).Find(&this.Hero)
 }
 
-func (this *player) PlayHero() bool {
-	if Game.noManStage()[this.Hero.Handle] > 0 {
-		id := this.Hero.ID + 6
-		this.Hero = database.Hero{}
-		database.DB.Where("ID=?", id).Find(&this.Hero)
-
-		Game.Stage = "幸運草"
-		return true
-	}
-	return false
-}
-
-func (this *player) HeroPower(choose int) bool {
-	if Game.checkLand(choose, this.Hero.Handle) {
-		Game.Stage = "幸運草結束"
-		return true
-	}
-	return false
+func (this *player) PlayHero() {
+	id := this.Hero.ID + 6
+	this.Hero = database.Hero{}
+	database.DB.Where("ID=?", id).Find(&this.Hero)
 }
 
 func (this *player) hardKnock(card database.Card) {
@@ -139,13 +130,40 @@ func (this *player) hardKnock(card database.Card) {
 	this.threat = append(this.threat, "HardKnock")
 }
 
-func (this *player) Speech() bool {
-	if this.SpeechTime == 0 {
-		return false
+func (this *player) checkHand(choose int, handle string) bool {
+
+	switch handle {
+	case "Mask":
+		if this.Handcard[choose].Mask {
+			return true
+		}
+	case "Rain":
+		if this.Handcard[choose].Rain {
+			return true
+		}
+	case "Snow":
+		if this.Handcard[choose].Snow {
+			return true
+		}
+	case "Bullet":
+		if this.Handcard[choose].Bullet {
+			return true
+		}
+	case "Night":
+		if this.Handcard[choose].Night {
+			return true
+		}
+	case "Whistle":
+		if this.Handcard[choose].Whistle {
+			return true
+		}
 	}
-	this.SpeechTime--
+	return false
+}
 
-	Game.Stage = "演說"
-
-	return true
+func (this *player) leaveCard(choose int) {
+	for i := choose; i < len(this.Handcard)-1; i++ {
+		this.Handcard[i] = this.Handcard[i+1]
+	}
+	this.Handcard = this.Handcard[:len(this.Handcard)-1]
 }

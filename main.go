@@ -56,70 +56,85 @@ func main() {
 			json.Unmarshal(msg.Body, &request)
 
 			receive := request.Order
-			switch receive {
-			case "draw":
-				Game.Draw(nsConn.Conn.ID(), 6)
-				msg.Body = Players[GetOrder(nsConn.Conn.ID())].Render()
-				nsConn.Conn.Write(msg)
-
-			case "restart":
-				Game.InitGame()
-
-				msg.Body = Players[GetOrder(nsConn.Conn.ID())].Render()
-				nsConn.Conn.Write(msg)
-				msg.Body = Game.Render()
-				nsConn.Conn.Write(msg)
-				nsConn.Conn.Server().Broadcast(nsConn, msg)
-
-			case "heroUse":
-				if Players[GetOrder(nsConn.Conn.ID())].PlayHero() {
-					msg.Body = Players[GetOrder(nsConn.Conn.ID())].Render()
-					nsConn.Conn.Write(msg)
-				}
-
-			case "speech":
-				if Players[GetOrder(nsConn.Conn.ID())].Speech() {
-					msg.Body = Players[GetOrder(nsConn.Conn.ID())].Render()
-					nsConn.Conn.Write(msg)
-					msg.Body = Game.Render()
-					nsConn.Conn.Write(msg)
-				}
-
-			case "luckyClover":
-				choose, err := strconv.Atoi(request.Choose)
-				if err != nil {
-					log.Println("Something wrong!")
-				}
-				if Players[GetOrder(nsConn.Conn.ID())].HeroPower(choose) {
-					msg.Body = Players[GetOrder(nsConn.Conn.ID())].Render()
-					nsConn.Conn.Write(msg)
-					msg.Body = Game.Render()
-					nsConn.Conn.Write(msg)
-				}
-
-			case "playCard":
-				num, _ := strconv.Atoi(request.Choose)
-				Players[GetOrder(nsConn.Conn.ID())].PlayCard(num)
-				Game.GameNext()
-
-				msg.Body = Players[GetOrder(nsConn.Conn.ID())].Render()
-				nsConn.Conn.Write(msg)
-				msg.Body = Game.Render()
-				nsConn.Conn.Write(msg)
-				nsConn.Conn.Server().Broadcast(nsConn, msg)
-
-			case "login":
+			if receive == "login" {
 				Game.NewPlayer(nsConn.Conn.ID(), request.Choose)
 				Game.NoMansLand = []database.Card{}
 				Game.Stage = "Waiting"
 				msg.Body = Game.Render()
 				nsConn.Conn.Write(msg)
 				nsConn.Conn.Server().Broadcast(nsConn, msg)
+			} else {
+				player := &Players[GetOrder(nsConn.Conn.ID())]
 
-			default:
+				switch receive {
 
+				case "restart":
+					Game.InitGame()
+					Round.Init()
+
+					msg.Body = player.Render()
+					nsConn.Conn.Write(msg)
+					msg.Body = Game.Render()
+					nsConn.Conn.Write(msg)
+					nsConn.Conn.Server().Broadcast(nsConn, msg)
+
+				case "draw":
+					Round.Draw(player, 6)
+					msg.Body = player.Render()
+					nsConn.Conn.Write(msg)
+					msg.Body = Game.Render()
+					nsConn.Conn.Write(msg)
+					nsConn.Conn.Server().Broadcast(nsConn, msg)
+
+				case "playCard":
+					num, _ := strconv.Atoi(request.Choose)
+					Round.PlayCard(player, num)
+
+					msg.Body = player.Render()
+					nsConn.Conn.Write(msg)
+					msg.Body = Game.Render()
+					nsConn.Conn.Write(msg)
+					nsConn.Conn.Server().Broadcast(nsConn, msg)
+
+				case "heroUse":
+					if Round.PlayHero(player) {
+						msg.Body = player.Render()
+						nsConn.Conn.Write(msg)
+					}
+				case "luckyClover":
+					choose, _ := strconv.Atoi(request.Choose)
+
+					if Round.HeroUse(player, choose) {
+						msg.Body = player.Render()
+						nsConn.Conn.Write(msg)
+						msg.Body = Game.Render()
+						nsConn.Conn.Write(msg)
+						nsConn.Conn.Server().Broadcast(nsConn, msg)
+					}
+
+				case "speech":
+					Round.Speech(player, request.Choose)
+
+					msg.Body = player.Render()
+					nsConn.Conn.Write(msg)
+					msg.Body = Game.Render()
+					nsConn.Conn.Write(msg)
+					nsConn.Conn.Server().Broadcast(nsConn, msg)
+
+				case "speechCard":
+					choose, _ := strconv.Atoi(request.Choose)
+					if Round.SpeechCard(player, choose) {
+						msg.Body = player.Render()
+						nsConn.Conn.Write(msg)
+						msg.Body = Game.Render()
+						nsConn.Conn.Write(msg)
+						nsConn.Conn.Server().Broadcast(nsConn, msg)
+					}
+
+				default:
+
+				}
 			}
-
 			return nil
 		},
 	})

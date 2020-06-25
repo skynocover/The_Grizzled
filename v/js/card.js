@@ -21,8 +21,13 @@ hands = getElementsByIdStartsWith("hands", "div", "hand")
 for (let i = 0; i < hands.length; i++) {
 	hands[i].onclick= function () {
 		if (hands[i].style.backgroundImage.search("cardBack")==-1) {
-			let playCard = '{"order":"playCard","choose":"'+i+'"}';
-			w.send(playCard);
+			if (stage.innerHTML.split(":")[0]=="演說" ){
+				let playCard = '{"order":"speechCard","choose":"'+i+'"}';
+				w.send(playCard);
+			}else{
+				let playCard = '{"order":"playCard","choose":"'+i+'"}';
+				w.send(playCard);
+			}
 		}
 	}
 }
@@ -71,14 +76,14 @@ w.onmessage = function (message) {
 				Lands[i].style.backgroundImage = '';
 			}
 		}
-
+		// 清空threat
 		for (let i = 0; i < threats.length; i++) {
 			var divs=threats[i].getElementsByTagName("div");
     		while(divs.length>0){
   		   	 threats[i].removeChild(divs[0]);
 			}
 		}
-
+		//放入threat
 		for (let i = 0; i < jsonArray["Threats"].length; i++) {
 			for (let j = 0; j < jsonArray["Threats"][i].length; j++) {
 				var odiv=document.createElement("div");
@@ -118,6 +123,7 @@ w.onmessage = function (message) {
 			}
 		}
 		hero.style = `background-image:url(./hero/${jsonArray["Hero"]["Name"]}.png)`;
+		
 		document.getElementById("speechNum").innerHTML="x"+jsonArray["SpeechTime"]
 		support0.innerHTML = "x"+jsonArray["Support"]["Left"]
 		support1.innerHTML = "x"+jsonArray["Support"]["Right"]
@@ -126,25 +132,6 @@ w.onmessage = function (message) {
 	}
 };
 
-var trialnum = 0
-trial.onclick = function () {
-	swal({
-  		title: "考驗:"+trialnum,
-	});
-	/*
-	if (stage.innerHTML!="Waiting") {
-		let draw= '{"order":"draw"}';
-		w.send(draw)
-	}
-	*/
-}
-
-var moralenum = 0
-morale.onclick = function () {
-	swal({
-  		title: "士氣:"+moralenum,
-	});
-}
 
 hero.onclick = function () {
 	if (this.style.backgroundImage.search("used") == -1) {
@@ -159,7 +146,8 @@ restart.onclick = function () {
 }
 
 speech.onclick = function () {
-	swal("選擇一個威脅", {
+	if (this.innerHTML!="x0") {
+		swal("選擇一個威脅", {
   		buttons: {
   			cancel: "Cancel!",
     		take0:{text:"雨天",value:"Rain"},
@@ -169,12 +157,31 @@ speech.onclick = function () {
     		take4:{text:"哨子",value:"Whistle"},
     		take5:{text:"面具",value:"Mask"},
   		},
-	}).then((value) => {
+		}).then((value) => {
 		if (value!=null) {
 			let speech = '{"order":"speech","choose":"'+value+'"}';
 			w.send(speech);
 		}
-	})
+		})
+	}
 }
 
 
+
+
+
+/* 牌庫檢查 */
+var trialnum = 0
+trial.onclick = function () {
+	swal({
+  		title: "考驗:"+trialnum,
+	});
+}
+
+var moralenum = 0
+morale.onclick = function () {
+	swal({
+  		title: "士氣:"+moralenum,
+	});
+}
+/* 牌庫檢查結束 */
