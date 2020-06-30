@@ -11,7 +11,7 @@
                     content: "input",
                 })
                 .then((value) => {
-                    if (value!="") {
+                    if (value){
                         let speech = '{"order":"login","choose":"'+value+'"}';
                         me.innerHTML = value;
 	                    w.send(speech);
@@ -36,27 +36,27 @@
     </div>
     <div id="players" class="players">
         <div id="threat0" class="player">
-            <span id="player0">Player0</span>
+            <span id="player0"></span>
             <br>
         </div>
         <br>
         <div id="threat1" class="player">
-            <span id="player1">Player1</span>
+            <span id="player1"></span>
             <br>
         </div>
         <br>
         <div id="threat2" class="player">
-            <span id="player2">Player2</span>
+            <span id="player2"></span>
             <br>
         </div>
         <br>
         <div id="threat3" class="player">
-            <span id="player3">Player3</span>
+            <span id="player3"></span>
             <br>
         </div>
         <br>
         <div id="threat4" class="player">
-            <span id="player4">Player4</span>
+            <span id="player4"></span>
             <br>
         </div>        
 

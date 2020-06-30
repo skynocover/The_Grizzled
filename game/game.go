@@ -28,9 +28,10 @@ type Tgame struct {
 	Stage      string
 	speech     int
 	/* render用*/
-	Process string
-	Players []string
-	Threats [][]string
+	Process  string
+	Players  []string
+	Threats  [][]string
+	RoundWin bool
 	//PlayerNow string
 	TM [2]int //兩個牌組的數量
 }
@@ -42,7 +43,12 @@ func (this *Tgame) Render() []byte {
 	this.Players = []string{}
 
 	for i := 0; i < len(Players); i++ {
-		this.Players = append(this.Players, Players[i].Name)
+		if Players[i].WithDraw {
+			this.Players = append(this.Players, Players[i].Name+"已撤退")
+		} else {
+			this.Players = append(this.Players, Players[i].Name)
+		}
+
 		this.Threats = append(this.Threats, []string{})
 		for j := 0; j < len(Players[i].threat); j++ {
 			this.Threats[i] = append(this.Threats[i], Players[i].threat[j])
@@ -111,12 +117,13 @@ func (this *Tgame) InitGame() {
 	hero := randCard(6)
 	support := randCard(16 - len(Players)*2)
 	for i := range Players {
-		Players[i].InitPlayer()
-		Players[i].TakeHero(hero[i])
-		Players[i].takeSupport(support[i])
+		Players[i].InitPlayer(hero[i], support[i])
+		//Players[i].TakeHero(hero[i])
+		//Players[i].takeSupport(support[i])
 	}
-
-	this.Stage = "Start!"
+	Round.rounds = 0
+	Round.Status.SetState("pending")
+	Round.Init(3) //開始新的回合並且抽三張
 }
 
 func (this *Tgame) NewPlayer(id string, name string) {
@@ -182,22 +189,11 @@ func randCard(num int) (pile []int) {
 	return
 }
 
-func GetOrder(id string) int {
+func GetOrder(id string) int { //回傳真正的玩家順序
 	for i, p := range Players {
 		if p.Id == id {
 			return i
 		}
 	}
 	return -1
-}
-
-func (this *Tgame) InitCard() {
-	/*
-		this.order = 0
-		this.trials = pile{}
-		this.morale = pile{}
-		this.noMansLand = []database.Card{}
-		this.Stage = ""
-	*/
-
 }

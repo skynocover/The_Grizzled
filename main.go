@@ -68,9 +68,8 @@ func main() {
 
 				switch receive {
 
-				case "restart":
+				case "restart": //重新開始遊戲
 					Game.InitGame()
-					Round.Init()
 
 					msg.Body = player.Render()
 					nsConn.Conn.Write(msg)
@@ -78,8 +77,19 @@ func main() {
 					nsConn.Conn.Write(msg)
 					nsConn.Conn.Server().Broadcast(nsConn, msg)
 
-				case "draw":
-					Round.Draw(player, 6)
+				case "draw": //每個人抽牌
+					Round.Draw(player)
+
+					msg.Body = player.Render()
+					nsConn.Conn.Write(msg)
+					msg.Body = Game.Render()
+					nsConn.Conn.Write(msg)
+					nsConn.Conn.Server().Broadcast(nsConn, msg)
+
+				case "newRound": //新的回合
+					num, _ := strconv.Atoi(request.Choose)
+					Round.Init(num)
+
 					msg.Body = player.Render()
 					nsConn.Conn.Write(msg)
 					msg.Body = Game.Render()
@@ -100,6 +110,9 @@ func main() {
 					if Round.PlayHero(player) {
 						msg.Body = player.Render()
 						nsConn.Conn.Write(msg)
+						msg.Body = Game.Render()
+						nsConn.Conn.Write(msg)
+						nsConn.Conn.Server().Broadcast(nsConn, msg)
 					}
 				case "luckyClover":
 					choose, _ := strconv.Atoi(request.Choose)
@@ -123,6 +136,7 @@ func main() {
 
 				case "speechCard":
 					choose, _ := strconv.Atoi(request.Choose)
+
 					if Round.SpeechCard(player, choose) {
 						msg.Body = player.Render()
 						nsConn.Conn.Write(msg)
@@ -130,6 +144,26 @@ func main() {
 						nsConn.Conn.Write(msg)
 						nsConn.Conn.Server().Broadcast(nsConn, msg)
 					}
+
+				case "support": //點選支援
+					choose, _ := strconv.Atoi(request.Choose)
+
+					if Round.Support(player, choose) {
+						msg.Body = player.Render()
+						nsConn.Conn.Write(msg)
+						msg.Body = Game.Render()
+						nsConn.Conn.Write(msg)
+						nsConn.Conn.Server().Broadcast(nsConn, msg)
+					}
+
+				case "supportEnd": //支援結束後通知支援的結果
+					Round.SupportEnd(player, request.Choose)
+
+					msg.Body = player.Render()
+					nsConn.Conn.Write(msg)
+					msg.Body = Game.Render()
+					nsConn.Conn.Write(msg)
+					nsConn.Conn.Server().Broadcast(nsConn, msg)
 
 				default:
 

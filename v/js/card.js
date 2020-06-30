@@ -24,7 +24,7 @@ for (let i = 0; i < hands.length; i++) {
 			if (stage.innerHTML.split(":")[0]=="演說" ){
 				let playCard = '{"order":"speechCard","choose":"'+i+'"}';
 				w.send(playCard);
-			}else{
+			}else if(me.innerHTML==stage.innerHTML){
 				let playCard = '{"order":"playCard","choose":"'+i+'"}';
 				w.send(playCard);
 			}
@@ -35,7 +35,7 @@ for (let i = 0; i < hands.length; i++) {
 Lands = getElementsByIdStartsWith("lands", "div", "Land")
 for (let i = 0; i < Lands.length; i++) {
 	Lands[i].onclick= function () {
-		if (stage.innerHTML=="幸運草") {
+		if (stage.innerHTML.split(":")[0]==me.innerHTML &&  stage.innerHTML.split(":")[1]=="幸運草") {
 			let lucky = '{"order":"luckyClover","choose":"'+i+'"}';
 			w.send(lucky)
 		}
@@ -107,9 +107,115 @@ w.onmessage = function (message) {
   				button: "抽牌",
 			})
 			.then(() =>{
-				let draw= '{"order":"draw"}';
-				w.send(draw)
+				w.send('{"order":"draw"}')
 			});
+		}else if (jsonArray["Stage"]=="SupportSkip"){
+			if (jsonArray["RoundWin"]) {
+				mission = "任務成功"
+				missionicon = "success"
+			}else{
+				mission = "任務失敗"
+				missionicon = "error"
+			}
+
+
+			swal({
+  				title: mission,
+  				icon: missionicon,
+			}).then(() =>{
+				swal({
+  					title: "沒有人得到支援",
+  					icon: "error",
+  					button: "確認",
+				})
+				.then((value) =>{
+					w.send('{"order":"supportEnd","choose":""}');
+				});
+			});
+
+		}else if (jsonArray["Stage"].split(":")[0]=="Support"){ //支援
+			if (jsonArray["RoundWin"]) {
+				mission = "任務成功"
+				missionicon = "success"
+			}else{
+				mission = "任務失敗"
+				missionicon = "error"
+			}
+
+			if ((jsonArray["Stage"].split(":")[1]==me.innerHTML)) {
+				swal({
+  					title: mission,
+  					icon: missionicon,
+				}).then(() =>{
+					swal({
+  						title: "得到支援",
+  						icon: "success",
+  						buttons: {
+    						take0:{text:"消除身上威脅",value:"Threat"},
+    						take1:{text:"回覆英雄能力",value:"Lucky"},
+  						},
+					})
+					.then((value) =>{
+						w.send('{"order":"supportEnd","choose":"'+value+'"}');
+					});
+				});
+				
+			}else{
+				swal({
+  					title: mission,
+  					icon: missionicon,
+				}).then(() =>{
+					swal({
+  						title: jsonArray["Stage"].split(":")[1]+"得到支援",
+  						icon: "info",
+  						button: "確認",
+					})
+					.then(() =>{
+						w.send('{"order":"supportEnd","choose":""}')
+					});
+				});
+			}
+
+			/*
+			if ((jsonArray["Stage"].split(":")[1]==me.innerHTML)) {
+				swal({
+  					title: "得到支援",
+  					icon: "success",
+  					buttons: {
+    					take0:{text:"消除身上威脅",value:"Threat"},
+    					take1:{text:"回覆英雄能力",value:"Lucky"},
+  					},
+				})
+				.then((value) =>{
+					w.send('{"order":"supportEnd","choose":"'+value+'"}');
+				});
+			}else{
+				swal({
+  					title: jsonArray["Stage"].split(":")[1]+"得到支援",
+  					icon: "info",
+  					button: "確認",
+				})
+				.then(() =>{
+					w.send('{"order":"supportEnd","choose":""}')
+				});
+			}
+			*/
+			
+		}else if  (jsonArray["Stage"].split(":")[0]=="Leader" && jsonArray["Stage"].split(":")[1]==me.innerHTML){
+			swal("選擇抽牌張數",{
+  				buttons: {
+    				take0:{text:"抽一張",value:"1"},
+    				take1:{text:"抽兩張",value:"2"},
+    				take2:{text:"抽三張",value:"3"},
+    				take3:{text:"抽四張",value:"4"},
+  				},
+			}).then((value) => {
+				w.send('{"order":"newRound","choose":"'+value+'"}')
+			})
+		}else if (jsonArray["Stage"]=="WinGame"){
+			swal("遊戲結束!", "和平再現!", "success");
+		}else if (jsonArray["Stage"]=="LoseGame"){
+			swal("遊戲結束!", "紀念碑", "error");
 		}
 	}
 
@@ -125,10 +231,10 @@ w.onmessage = function (message) {
 		hero.style = `background-image:url(./hero/${jsonArray["Hero"]["Name"]}.png)`;
 		
 		document.getElementById("speechNum").innerHTML="x"+jsonArray["SpeechTime"]
-		support0.innerHTML = "x"+jsonArray["Support"]["Left"]
-		support1.innerHTML = "x"+jsonArray["Support"]["Right"]
-		support2.innerHTML = "x"+jsonArray["Support"]["Left2"]
-		support3.innerHTML = "x"+jsonArray["Support"]["Right2"]
+		support0.innerHTML = "x"+jsonArray["Support"][0]
+		support1.innerHTML = "x"+jsonArray["Support"][1]
+		support2.innerHTML = "x"+jsonArray["Support"][2]
+		support3.innerHTML = "x"+jsonArray["Support"][3]
 	}
 };
 
@@ -158,10 +264,10 @@ speech.onclick = function () {
     		take5:{text:"面具",value:"Mask"},
   		},
 		}).then((value) => {
-		if (value!=null) {
-			let speech = '{"order":"speech","choose":"'+value+'"}';
-			w.send(speech);
-		}
+			if (value!=null) {
+				let speech = '{"order":"speech","choose":"'+value+'"}';
+				w.send(speech);
+			}
 		})
 	}
 }
