@@ -1,68 +1,67 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta charset="utf-8" />
-	<title>The Grizzled</title>
-    <link rel="stylesheet" href="./css/style.css">
-     <script>
-        function login(){
-            if (document.getElementById("stage").innerHTML=="Waiting" && document.getElementById("me").innerHTML=="") {
-                swal("請輸入玩家名稱:", {
-                    content: "input",
-                })
-                .then((value) => {
-                    if (value){
-                        let speech = '{"order":"login","choose":"'+value+'"}';
-                        me.innerHTML = value;
-	                    w.send(speech);
-                    }
-                });
+  <head>
+    <meta charset="utf-8" />
+    <title>The Grizzled</title>
+    <link rel="stylesheet" href="./css/style.css" />
+    <script>
+      function login() {
+        if (
+          document.getElementById('stage').innerHTML == 'Waiting' &&
+          document.getElementById('me').innerHTML == ''
+        ) {
+          swal('請輸入玩家名稱:', {
+            content: 'input',
+          }).then((value) => {
+            if (value) {
+              let speech = '{"order":"login","choose":"' + value + '"}';
+              me.innerHTML = value;
+              w.send(speech);
             }
+          });
         }
+      }
     </script>
-</head>
+  </head>
 
-<body >
+  <body>
+    <script type="text/babel" src="/js/App.js"></script>
 
-<script type="text/babel" src="/js/App.js"></script>
-
-<div class="menu">
-
-    <div class="title" >
+    <div class="menu">
+      <div class="title">
         <div class="coffee" onclick="login()"></div>
-        <div id="me"></div>
+        <div id="me" style="display: none;"></div>
         <div id="restart" class="restart">Restart</div>
         <div id="stage" class="restart">Waiting</div>
-    </div>
-    <div id="players" class="players">
+      </div>
+      <div id="players" class="players">
         <div id="threat0" class="player">
-            <span id="player0"></span>
-            <br>
+          <span id="player0"></span>
+          <br />
         </div>
-        <br>
+        <br />
         <div id="threat1" class="player">
-            <span id="player1"></span>
-            <br>
+          <span id="player1"></span>
+          <br />
         </div>
-        <br>
+        <br />
         <div id="threat2" class="player">
-            <span id="player2"></span>
-            <br>
+          <span id="player2"></span>
+          <br />
         </div>
-        <br>
+        <br />
         <div id="threat3" class="player">
-            <span id="player3"></span>
-            <br>
+          <span id="player3"></span>
+          <br />
         </div>
-        <br>
+        <br />
         <div id="threat4" class="player">
-            <span id="player4"></span>
-            <br>
-        </div>        
+          <span id="player4"></span>
+          <br />
+        </div>
+      </div>
 
-    </div>
-   
-    <!---
+      <!---
     <ul>
         <li>Home</li>
         <li>Pag1</li>
@@ -78,46 +77,66 @@
         <div class="but show"></div>
     </div> 
     --->
-</div>
-
-<div class="content">
-    
-    <div class="banner">
-        <div class="table">
-            
-            <div class="pile">
-                <div id="trial" class="Trials"></div>
-                <div id="morale" class="MoraleReserve"></div>
-            </div> 
-            <div id="lands" class="noMansLand">
-                <!--<div style="background-image:url(./card/Bullet_Mask.png);"></div>-->
-                <div id="Land0" ></div>
-                <div id="Land1" ></div>
-                <div id="Land2" ></div>
-                <div id="Land3"></div>
-                <div id="Land4" ></div>
-                <div id="Land5" ></div>
-                <div id="Land6" ></div>
-            </div> 
-        </div>
-        
     </div>
-    <div class="other">
+
+    <div class="content">
+      <div class="banner">
+        <div class="table">
+          <div class="pile">
+            <div id="trial" class="Trials"></div>
+            <div id="morale" class="MoraleReserve"></div>
+          </div>
+          <div id="lands" class="noMansLand">
+            <!--<div style="background-image:url(./card/Bullet_Mask.png);"></div>-->
+            <div id="Land0"></div>
+            <div id="Land1"></div>
+            <div id="Land2"></div>
+            <div id="Land3"></div>
+            <div id="Land4"></div>
+            <div id="Land5"></div>
+            <div id="Land6"></div>
+          </div>
+        </div>
+      </div>
+      <div class="other">
         <div id="supports" class="support">
-            <span>支援</span><br>
-            <div id="support0" style="background-image:url(./icon/support_left.png);">x0</div>
-            <div id="support1" style="background-image:url(./icon/support_right.png);">x0</div>
-            <div id="support2" style="background-image:url(./icon/support_left_2.png);">x0</div>
-            <div id="support3" style="background-image:url(./icon/support_right_2.png);">x0</div>
+          <span>支援</span><br />
+          <div
+            id="support0"
+            style="background-image: url(./icon/support_left.png);"
+          >
+            x0
+          </div>
+          <div
+            id="support1"
+            style="background-image: url(./icon/support_right.png);"
+          >
+            x0
+          </div>
+          <div
+            id="support2"
+            style="background-image: url(./icon/support_left_2.png);"
+          >
+            x0
+          </div>
+          <div
+            id="support3"
+            style="background-image: url(./icon/support_right_2.png);"
+          >
+            x0
+          </div>
         </div>
         <div class="speech">
-            <span>演說</span><br>
-            <div id="speech" style="background-image:url(./icon/speech.png);"></div>
-            <span id="speechNum">x0</span>
+          <span>演說</span><br />
+          <div
+            id="speech"
+            style="background-image: url(./icon/speech.png);"
+          ></div>
+          <span id="speechNum">x0</span>
         </div>
-    </div>
-    
-    <div id="hands" class="hand">
+      </div>
+
+      <div id="hands" class="hand">
         <div id="hand0"></div>
         <div id="hand1"></div>
         <div id="hand2"></div>
@@ -127,15 +146,14 @@
         <div id="hand6"></div>
         <div id="hand7"></div>
         <div id="hero"></div>
+      </div>
     </div>
-</div>
-<script type="text/javascript">
-    var HOST = {{.Host }}
-</script>
+    <script type="text/javascript">
+      var HOST = {{.Host }}
+    </script>
 
-<script src="/js/card.js" type="text/javascript"></script>
+    <script src="/js/card.js" type="text/javascript"></script>
 
-<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-
-</body>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  </body>
 </html>

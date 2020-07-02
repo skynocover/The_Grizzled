@@ -104,7 +104,7 @@ func (this *Tgame) InitGame() {
 		database.DB.Where("ID=?", newCards[i]).Find(&findcard)
 		this.trials.cards.Push(findcard)
 	}
-	this.trials.cards.Prt()
+	//this.trials.cards.Prt()
 
 	for j := 25; j < allCard; j++ {
 		findcard := database.Card{}

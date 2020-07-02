@@ -98,13 +98,13 @@ func main() {
 
 				case "playCard":
 					num, _ := strconv.Atoi(request.Choose)
-					Round.PlayCard(player, num)
-
-					msg.Body = player.Render()
-					nsConn.Conn.Write(msg)
-					msg.Body = Game.Render()
-					nsConn.Conn.Write(msg)
-					nsConn.Conn.Server().Broadcast(nsConn, msg)
+					if Round.PlayCard(player, num) {
+						msg.Body = player.Render()
+						nsConn.Conn.Write(msg)
+						msg.Body = Game.Render()
+						nsConn.Conn.Write(msg)
+						nsConn.Conn.Server().Broadcast(nsConn, msg)
+					}
 
 				case "heroUse":
 					if Round.PlayHero(player) {
@@ -126,13 +126,13 @@ func main() {
 					}
 
 				case "speech":
-					Round.Speech(player, request.Choose)
-
-					msg.Body = player.Render()
-					nsConn.Conn.Write(msg)
-					msg.Body = Game.Render()
-					nsConn.Conn.Write(msg)
-					nsConn.Conn.Server().Broadcast(nsConn, msg)
+					if Round.Speech(player, request.Choose) {
+						msg.Body = player.Render()
+						nsConn.Conn.Write(msg)
+						msg.Body = Game.Render()
+						nsConn.Conn.Write(msg)
+						nsConn.Conn.Server().Broadcast(nsConn, msg)
+					}
 
 				case "speechCard":
 					choose, _ := strconv.Atoi(request.Choose)
@@ -175,7 +175,6 @@ func main() {
 
 	ws.OnConnect = func(c *websocket.Conn) error {
 		log.Printf("[%s] Connected to server!", c.ID())
-		//c.Write(game.Board.NoMansLand)
 		return nil
 	}
 
@@ -192,7 +191,7 @@ func main() {
 	//主頁
 	app.Get("/", func(ctx iris.Context) {
 		//綁定數據
-		ctx.ViewData("Host", "localhost:"+os.Getenv("port"))
+		ctx.ViewData("Host", "127.0.0.1:"+os.Getenv("port"))
 		// 渲染視圖文件: ./v/index.html
 		ctx.View("index.html")
 
