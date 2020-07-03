@@ -57,12 +57,15 @@ func main() {
 
 			receive := request.Order
 			if receive == "login" {
-				Game.NewPlayer(nsConn.Conn.ID(), request.Choose)
-				Game.NoMansLand = []database.Card{}
-				Game.Stage = "Waiting"
-				msg.Body = Game.Render()
-				nsConn.Conn.Write(msg)
-				nsConn.Conn.Server().Broadcast(nsConn, msg)
+				if Game.NewPlayer(nsConn.Conn.ID(), request.Choose) {
+					msg.Body = Game.Render()
+					nsConn.Conn.Write(msg)
+					nsConn.Conn.Server().Broadcast(nsConn, msg)
+				}else {
+					Game.Stage = "ID重複"
+					msg.Body = Game.Render()
+					nsConn.Conn.Write(msg)
+				}
 			} else {
 				player := &Players[GetOrder(nsConn.Conn.ID())]
 
@@ -70,6 +73,8 @@ func main() {
 
 				case "restart": //重新開始遊戲
 					Game.InitGame()
+					Game.NoMansLand = []database.Card{}
+					Game.Stage = "Waiting"
 
 					msg.Body = player.Render()
 					nsConn.Conn.Write(msg)
@@ -191,7 +196,7 @@ func main() {
 	//主頁
 	app.Get("/", func(ctx iris.Context) {
 		//綁定數據
-		ctx.ViewData("Host", "127.0.0.1:"+os.Getenv("port"))
+		ctx.ViewData("Host", os.Getenv("host")+":"+os.Getenv("port"))
 		// 渲染視圖文件: ./v/index.html
 		ctx.View("index.html")
 

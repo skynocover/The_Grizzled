@@ -37,18 +37,14 @@ func init() { //宣告狀態機
 			{Name: "SupportEnd", Src: []string{"Support"}, Dst: "End"},
 
 			{Name: "WinGame", Src: []string{"Mission"}, Dst: "End"},
-			{Name: "LoseGame", Src: []string{"Mission"}, Dst: "End"},
+			{Name: "LoseGame", Src: []string{"Support", "Mission"}, Dst: "End"},
 		},
 		fsm.Callbacks{ //成功設置後執行
 			"enter_state": func(e *fsm.Event) {
 				switch e.Event {
 				case "Start": //四個人都抽完牌
-					if Game.morale.cards.Len() == 0 {
-						Round.Status.Event("LoseGame")
-					} else {
-						Round.tmp = 0
-						Game.Stage = Round.playerlist.Peek().(player).Name
-					}
+					Round.tmp = 0
+					Game.Stage = Round.playerlist.Peek().(player).Name
 
 				case "LuckyClover":
 					log.Println("幸運草階段")
@@ -60,7 +56,6 @@ func init() { //宣告狀態機
 				case "Speech":
 					log.Println("演說開始")
 					Game.Stage = "演說:" + Round.speechThreat
-					//Game.Stage = Round.playerlist.Peek().(player).Name
 				case "SpeechEnd":
 					log.Println("演說結束")
 					Round.tmp = 0
@@ -118,12 +113,22 @@ func init() { //宣告狀態機
 					}
 					if Round.success {
 						for i := 0; i < trial; i++ {
-							Game.trials.cards.Push(Game.morale.cards.Pop())
+							if Game.morale.cards.Empty() {
+								Round.Status.Event("LoseGame")
+								break
+							} else {
+								Game.trials.cards.Push(Game.morale.cards.Pop())
+							}
 						}
 					} else {
 						temp := []database.Card{} //暫時將要放入磨練的牌存起來
 						for i := 0; i < trial; i++ {
-							temp = append(temp, Game.morale.cards.Pop().(database.Card))
+							if Game.morale.cards.Empty() {
+								Round.Status.Event("LoseGame")
+								break
+							} else {
+								temp = append(temp, Game.morale.cards.Pop().(database.Card))
+							}
 						}
 						temp = append(temp, Game.NoMansLand...)
 						rand := randCard(len(temp))
@@ -158,7 +163,7 @@ func (this *tRound) Init(num int) { //開始新的回合
 		this.playerlist.Push(this.playerlist.Get())
 	}
 	this.rounds++
-	Game.Stage = "Start!" //通知所有人抽牌
+	Game.Stage = "DrawCard" //通知所有人抽牌
 }
 
 func (this *tRound) Support(playnow *player, choose int) bool {
@@ -307,7 +312,6 @@ func (this *tRound) PlayHero(playnow *player) bool { //使用英雄能力
 	this.Status.Event("LuckyClover")
 	playnow.PlayHero()
 	return true
-
 }
 
 func (this *tRound) Draw(player *player) {
@@ -328,18 +332,15 @@ func (this *tRound) Draw(player *player) {
 func (this *tRound) PlayCard(playernow *player, num int) bool {
 	if this.playerlist.Peek().(player).Id != playernow.Id {
 		return false
+	} else if num >= len(playernow.Handcard) {
+		return false
 	}
 	playernow.playCard(num)
-	this.playerlist.Push(this.playerlist.Get())
 
 	if this.threatOver() {
 		Round.success = false //超過威脅則任務失敗並進入支援階段
 		Round.Status.Event("Support")
-	} else {
-		Game.Stage = this.playerlist.Peek().(player).Name
-	}
-
-	if Game.trials.cards.Len() == 0 {
+	} else if len(playernow.Handcard) == 0 && Game.trials.cards.Len() == 0 {
 		var hand = 0
 		for i := range Players {
 			hand = hand + len(Players[i].Handcard)
@@ -347,6 +348,9 @@ func (this *tRound) PlayCard(playernow *player, num int) bool {
 		if hand == 0 {
 			this.Status.Event("WinGame")
 		}
+	} else {
+		this.playerlist.Push(this.playerlist.Get())
+		Game.Stage = this.playerlist.Peek().(player).Name
 	}
 	return true
 }
@@ -384,11 +388,11 @@ func (this *tRound) threatOver() bool {
 			}
 			if hardKnock > 3 {
 				this.Status.Event("LoseGame")
+				return true
 			}
 		}
 	}
 	for _, v := range threat {
-
 		if v > 2 {
 			return true
 		}

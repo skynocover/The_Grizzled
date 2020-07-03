@@ -126,8 +126,14 @@ func (this *Tgame) InitGame() {
 	Round.Init(3) //開始新的回合並且抽三張
 }
 
-func (this *Tgame) NewPlayer(id string, name string) {
+func (this *Tgame) NewPlayer(id string, name string) bool {
+	for i := range Players {
+		if Players[i].Name == name {
+			return false
+		}
+	}
 	Players = append(Players, player{Id: id, Name: name})
+	return true
 }
 
 func (this *Tgame) checkLand(choose int, handle string) bool {
