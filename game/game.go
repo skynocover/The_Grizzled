@@ -99,7 +99,7 @@ func (this *Tgame) InitGame() {
 
 	/*  洗牌  */
 	allCard := 48
-	trialsCard := 25
+	trialsCard, _ := strconv.Atoi(os.Getenv("trial"))
 	newCards := randCard(allCard)
 
 	for i := 0; i < trialsCard; i++ {

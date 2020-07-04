@@ -93,14 +93,19 @@ func main() {
 					nsConn.Conn.Server().Broadcast(nsConn, msg)
 
 				case "newRound": //新的回合
-					num, _ := strconv.Atoi(request.Choose)
-					Round.Init(num)
+					if request.Choose == "null" {
+						msg.Body = Game.Render()
+						nsConn.Conn.Write(msg)
+					} else {
+						num, _ := strconv.Atoi(request.Choose)
+						Round.Init(num)
 
-					msg.Body = player.Render()
-					nsConn.Conn.Write(msg)
-					msg.Body = Game.Render()
-					nsConn.Conn.Write(msg)
-					nsConn.Conn.Server().Broadcast(nsConn, msg)
+						msg.Body = player.Render()
+						nsConn.Conn.Write(msg)
+						msg.Body = Game.Render()
+						nsConn.Conn.Write(msg)
+						nsConn.Conn.Server().Broadcast(nsConn, msg)
+					}
 
 				case "playCard":
 					num, _ := strconv.Atoi(request.Choose)

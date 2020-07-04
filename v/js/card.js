@@ -148,101 +148,132 @@ w.onmessage = function (message) {
     moralenum = jsonArray['TM'][1];
 
     stage.innerHTML = jsonArray['Stage'];
-    if (jsonArray['Stage'] == 'DrawCard') {
-      swal({
-        title: '遊戲就緒',
-        icon: 'success',
-        button: '抽牌',
-      }).then(() => {
-        w.send('{"order":"draw"}');
-      });
-    } else if (jsonArray['Stage'] == 'SupportSkip') {
-      if (jsonArray['RoundWin']) {
-        mission = '任務成功';
-        missionicon = 'success';
-      } else {
-        mission = '任務失敗';
-        missionicon = 'error';
-      }
 
-      swal({
-        title: mission,
-        icon: missionicon,
-      }).then(() => {
+    switch (stage.innerHTML) {
+      case 'DrawCard': {
         swal({
-          title: '沒有人得到支援',
-          icon: 'error',
-          button: '確認',
-        }).then((value) => {
-          w.send('{"order":"supportEnd","choose":""}');
+          title: '遊戲就緒',
+          icon: 'success',
+          button: '抽牌',
+        }).then(() => {
+          w.send('{"order":"draw"}');
         });
-      });
-    } else if (jsonArray['Stage'].split(':')[0] == 'Support') {
-      //支援
-      if (jsonArray['RoundWin']) {
-        mission = '任務成功';
-        missionicon = 'success';
-      } else {
-        mission = '任務失敗';
-        missionicon = 'error';
+        break;
       }
+      case 'SupportSkip': {
+        if (jsonArray['RoundWin']) {
+          mission = '任務成功';
+          missionicon = 'success';
+        } else {
+          mission = '任務失敗';
+          missionicon = 'error';
+        }
 
-      if (jsonArray['Stage'].split(':')[1] == me.innerHTML) {
         swal({
           title: mission,
           icon: missionicon,
         }).then(() => {
           swal({
-            title: '得到支援',
-            icon: 'success',
-            buttons: {
-              take0: { text: '消除身上威脅', value: 'Threat' },
-              take1: { text: '回覆英雄能力', value: 'Lucky' },
-            },
-          }).then((value) => {
-            w.send('{"order":"supportEnd","choose":"' + value + '"}');
-          });
-        });
-      } else {
-        swal({
-          title: mission,
-          icon: missionicon,
-        }).then(() => {
-          swal({
-            title: jsonArray['Stage'].split(':')[1] + '得到支援',
-            icon: 'info',
+            title: '沒有人得到支援',
+            icon: 'error',
             button: '確認',
-          }).then(() => {
+          }).then((value) => {
             w.send('{"order":"supportEnd","choose":""}');
           });
         });
+        break;
       }
-    } else if (
-      jsonArray['Stage'].split(':')[0] == 'Leader' &&
-      jsonArray['Stage'].split(':')[1] == me.innerHTML
-    ) {
-      swal('選擇抽牌張數', {
-        buttons: {
-          take0: { text: '抽一張', value: '1' },
-          take1: { text: '抽兩張', value: '2' },
-          take2: { text: '抽三張', value: '3' },
-          take3: { text: '抽四張', value: '4' },
-        },
-      }).then((value) => {
-        w.send('{"order":"newRound","choose":"' + value + '"}');
-      });
-    } else if (jsonArray['Stage'].split(':')[0] == '演說') {
-      swal('演說階段', '目標:' + jsonArray['Stage'].split(':')[1]);
-    } else if (jsonArray['Stage'] == 'WinGame') {
-      swal('遊戲勝利!', '和平再現!', 'success');
-    } else if (jsonArray['Stage'].split(':')[0] == 'LoseGame') {
-      swal('遊戲失敗!', jsonArray['Stage'].split(':')[1], 'error');
-    } else if (jsonArray['Stage'] == 'ID重複') {
-      me.innerHTML = '';
-      swal('ID重複!', '請重新登入', 'error');
+      case 'Winner,Winner,Chicken Dinner': {
+        swal({
+          title: '遊戲勝利！',
+          text: '和平再現!',
+          icon: './card/Peace.png',
+        });
+        break;
+      }
+      case 'ID重複': {
+        me.innerHTML = '';
+        swal('ID重複!', '請重新登入', 'error');
+        break;
+      }
+      case me.innerHTML: {
+        swal('你的回合!', '請出牌,使用英雄能力,演說或撤退');
+        break;
+      }
+    }
+    switch (stage.innerHTML.split(':')[0]) {
+      case 'Support': {
+        //支援
+        if (jsonArray['RoundWin']) {
+          mission = '任務成功';
+          missionicon = 'success';
+        } else {
+          mission = '任務失敗';
+          missionicon = 'error';
+        }
+
+        if (jsonArray['Stage'].split(':')[1] == me.innerHTML) {
+          swal({
+            title: mission,
+            icon: missionicon,
+          }).then(() => {
+            swal({
+              title: '得到支援',
+              icon: 'success',
+              buttons: {
+                take0: { text: '消除身上威脅', value: 'Threat' },
+                take1: { text: '回覆英雄能力', value: 'Lucky' },
+              },
+            }).then((value) => {
+              w.send('{"order":"supportEnd","choose":"' + value + '"}');
+            });
+          });
+        } else {
+          swal({
+            title: mission,
+            icon: missionicon,
+          }).then(() => {
+            swal({
+              title: jsonArray['Stage'].split(':')[1] + '得到支援',
+              icon: 'info',
+              button: '確認',
+            }).then(() => {
+              w.send('{"order":"supportEnd","choose":""}');
+            });
+          });
+        }
+        break;
+      }
+      case 'Leader': {
+        if (jsonArray['Stage'].split(':')[1] == me.innerHTML) {
+          swal('選擇抽牌張數', {
+            buttons: {
+              take0: { text: '抽一張', value: '1' },
+              take1: { text: '抽兩張', value: '2' },
+              take2: { text: '抽三張', value: '3' },
+              take3: { text: '抽四張', value: '4' },
+            },
+            closeOnConfirm: false,
+          }).then((value) => {
+            w.send('{"order":"newRound","choose":"' + value + '"}');
+          });
+        }
+        break;
+      }
+      case '演說': {
+        swal('演說階段', '目標:' + jsonArray['Stage'].split(':')[1]);
+        break;
+      }
+      case 'Loser,Loser,now who’s dinner?': {
+        swal({
+          title: '遊戲失敗！',
+          text: jsonArray['Stage'].split(':')[1],
+          icon: './card/Monument.png',
+        });
+        break;
+      }
     }
   }
-
   if (jsonArray['Process'] == 'hand') {
     for (let i = 0; i < 8; i++) {
       if (i < jsonArray['Handcard'].length) {

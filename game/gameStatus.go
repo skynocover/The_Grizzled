@@ -71,6 +71,7 @@ func init() { //宣告狀態機
 					Game.Stage = Round.playerlist.Peek().(player).Name
 				case "Support":
 					log.Println("支援結算")
+					log.Println(Round.support)
 					maxsupport := 0            //統計最多數目的支援
 					maxsupported := []player{} //統計得到最多支援的人,使用陣列是因為可能有多個人相同
 					for i := range Round.support {
@@ -130,10 +131,10 @@ func init() { //宣告狀態機
 					}
 				case "WinGame":
 					log.Println("遊戲成功")
-					Game.Stage = "WinGame"
+					Game.Stage = "Winner,Winner,Chicken Dinner"
 				case "LoseGame":
 					log.Println("遊戲失敗")
-					Game.Stage = "LoseGame:" + Round.loseReason
+					Game.Stage = "Loser,Loser,now who’s dinner?:" + Round.loseReason
 				}
 			},
 		},
@@ -232,7 +233,7 @@ func (this *tRound) SupportEnd(playnow *player, choose string) {
 			cancel = 1
 		}
 		for i := range playnow.threat {
-			if i > cancel {
+			if i >= cancel {
 				break
 			}
 			playnow.threat = playnow.threat[1:]
@@ -338,6 +339,7 @@ func (this *tRound) PlayCard(playernow *player, num int) bool {
 	playernow.playCard(num)
 
 	if this.threatOver() {
+		log.Println("威脅過多")
 		Round.success = false //超過威脅則任務失敗並進入支援階段
 		Round.Status.Event("Support")
 	} else if len(playernow.Handcard) == 0 && Game.trials.cards.Len() == 0 {
@@ -380,7 +382,7 @@ func (this *tRound) threatOver() bool {
 	}
 	for i := range Players {
 		for j := range Players[i].threat {
-			if Players[i].WithDraw == false && Players[i].threat[j] != "hardKnock" {
+			if Players[i].WithDraw == false && Players[i].threat[j] != "HardKnock" {
 				threat[Players[i].threat[j]] = threat[Players[i].threat[j]] + 1
 			}
 		}
@@ -390,6 +392,8 @@ func (this *tRound) threatOver() bool {
 			return true
 		}
 	}
+	log.Print("當前場上威脅")
+	log.Println(threat)
 	for _, v := range threat {
 		threatLimit, _ := strconv.Atoi(os.Getenv("threatLimit"))
 		if v >= threatLimit {
