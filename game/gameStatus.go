@@ -1,10 +1,13 @@
 package game
 
 import (
-	"github.com/looplab/fsm"
-	DataStr "github.com/skynocover/GoStackQueue"
 	"grizzled/database"
 	"log"
+	"os"
+	"strconv"
+
+	"github.com/looplab/fsm"
+	DataStr "github.com/skynocover/GoStackQueue"
 )
 
 type tRound struct {
@@ -15,17 +18,19 @@ type tRound struct {
 	tmp          int        //用來暫時紀錄抽牌的人數
 	tmpEnd       int        //tmp的最終期望值
 	speechThreat string     //演說的威脅
+	loseReason   string     //輸遊戲的原因
 	playerlist   DataStr.Queue
 	Status       *fsm.FSM
 }
 
 func init() { //宣告狀態機
-	Round.drawNum = 3 //設定第一回合的抽牌數
+	Game.NoMansLand = []database.Card{}
+
 	Round.Status = fsm.NewFSM(
 		"pending", //初始值
 		fsm.Events{
 			//{Name: "Start", Src: []string{"pending", "End"}, Dst: "Draw"}, //遊戲開始到抽牌前
-			{Name: "Start", Src: []string{"pending", "Mission", "End", "LuckyClover", "Speech", "Support"}, Dst: "Mission"}, //抽玩牌遊戲開始
+			{Name: "Start", Src: []string{"pending", "Mission", "End", "LuckyClover", "Speech", "Support", "WinLose"}, Dst: "Mission"}, //抽玩牌遊戲開始
 
 			{Name: "LuckyClover", Src: []string{"Mission"}, Dst: "LuckyClover"},    //幸運草階段
 			{Name: "LuckyCloverEnd", Src: []string{"LuckyClover"}, Dst: "Mission"}, //幸運草階段結束
@@ -33,11 +38,11 @@ func init() { //宣告狀態機
 			{Name: "Speech", Src: []string{"Mission"}, Dst: "Speech"},    //演講開始
 			{Name: "SpeechEnd", Src: []string{"Speech"}, Dst: "Mission"}, //演講結束
 
-			{Name: "Support", Src: []string{"Mission"}, Dst: "Support"},
-			{Name: "SupportEnd", Src: []string{"Support"}, Dst: "End"},
+			{Name: "Support", Src: []string{"Mission"}, Dst: "Support"}, //所有人都退出後進入結算階段
+			{Name: "SupportEnd", Src: []string{"Support"}, Dst: "End"},  //所有人都確認結算的結果後進入此階段
 
-			{Name: "WinGame", Src: []string{"Mission"}, Dst: "End"},
-			{Name: "LoseGame", Src: []string{"Support", "Mission"}, Dst: "End"},
+			{Name: "WinGame", Src: []string{"Mission"}, Dst: "WinLose"},
+			{Name: "LoseGame", Src: []string{"Support", "Mission", "End"}, Dst: "WinLose"},
 		},
 		fsm.Callbacks{ //成功設置後執行
 			"enter_state": func(e *fsm.Event) {
@@ -92,8 +97,6 @@ func init() { //宣告狀態機
 
 				case "SupportEnd":
 					log.Println("支援階段結束")
-					log.Print("當前玩家list")
-					Round.playerlist.Prt()
 					Round.tmp = 0
 					//確認下一位隊長
 					leader := Round.rounds % len(Players)
@@ -111,35 +114,26 @@ func init() { //宣告狀態機
 					if trial < 3 {
 						trial = 3
 					}
-					if Round.success {
-						for i := 0; i < trial; i++ {
-							if Game.morale.cards.Empty() {
-								Round.Status.Event("LoseGame")
-								break
-							} else {
-								Game.trials.cards.Push(Game.morale.cards.Pop())
-							}
-						}
-					} else {
-						temp := []database.Card{} //暫時將要放入磨練的牌存起來
-						for i := 0; i < trial; i++ {
-							if Game.morale.cards.Empty() {
-								Round.Status.Event("LoseGame")
-								break
-							} else {
-								temp = append(temp, Game.morale.cards.Pop().(database.Card))
-							}
-						}
-						temp = append(temp, Game.NoMansLand...)
-						rand := randCard(len(temp))
+					if !Round.success {
+						rand := randCard(len(Game.NoMansLand))
 						for i := range rand {
-							Game.trials.cards.Push(temp[rand[i]-1])
+							Game.trials.cards.Push(Game.NoMansLand[rand[i]-1])
 						}
 					}
+					for i := 0; i < trial; i++ {
+						if Game.morale.cards.Empty() {
+							log.Println("遊戲失敗")
+							Round.loseReason = "士氣歸零"
+							break
+						}
+						Game.trials.cards.Push(Game.morale.cards.Pop())
+					}
 				case "WinGame":
+					log.Println("遊戲成功")
 					Game.Stage = "WinGame"
 				case "LoseGame":
-					Game.Stage = "LoseGame"
+					log.Println("遊戲失敗")
+					Game.Stage = "LoseGame:" + Round.loseReason
 				}
 			},
 		},
@@ -147,11 +141,14 @@ func init() { //宣告狀態機
 }
 
 func (this *tRound) Init(num int) { //開始新的回合
+	this.drawNum = num //設定本回合的抽牌數
+
 	Game.NoMansLand = []database.Card{}
-	this.drawNum = num
+	this.loseReason = ""
+	this.tmp = 0
+
 	this.playerlist = DataStr.Queue{}
 	this.support = []Supports{} //清空用來紀錄的support
-	this.tmp = 0
 	for i := range Players {
 		Players[i].WithDraw = false //重設所有人的撤退
 		Players[i].status = ""
@@ -252,6 +249,9 @@ func (this *tRound) SupportEnd(playnow *player, choose string) {
 	if this.tmp == len(Players) {
 		this.Status.Event("SupportEnd")
 	}
+	if this.loseReason != "" {
+		this.loseGame(this.loseReason)
+	}
 
 }
 
@@ -273,7 +273,7 @@ func (this *tRound) Speech(playnow *player, threat string) bool {
 	return true
 }
 func (this *tRound) SpeechCard(player *player, choose int) bool {
-	if player.status == "choosed" || this.Status.Current() != "speech" {
+	if player.status == "choosed" {
 		return false
 	}
 
@@ -380,22 +380,26 @@ func (this *tRound) threatOver() bool {
 	}
 	for i := range Players {
 		for j := range Players[i].threat {
-			hardKnock := 0
-			if Players[i].threat[j] == "HardKnock" {
-				hardKnock++
-			} else if Players[i].WithDraw == false {
+			if Players[i].WithDraw == false && Players[i].threat[j] != "hardKnock" {
 				threat[Players[i].threat[j]] = threat[Players[i].threat[j]] + 1
 			}
-			if hardKnock > 3 {
-				this.Status.Event("LoseGame")
-				return true
-			}
+		}
+		hardKnockLimit, _ := strconv.Atoi(os.Getenv("hardKnockLimit"))
+		if len(Players[i].threat) >= hardKnockLimit {
+			this.loseGame("戰友死亡")
+			return true
 		}
 	}
 	for _, v := range threat {
-		if v > 2 {
+		threatLimit, _ := strconv.Atoi(os.Getenv("threatLimit"))
+		if v >= threatLimit {
 			return true
 		}
 	}
 	return false
+}
+
+func (this *tRound) loseGame(reason string) {
+	this.loseReason = reason
+	this.Status.Event("LoseGame")
 }

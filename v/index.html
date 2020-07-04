@@ -7,8 +7,9 @@
     <script>
       function login() {
         if (
-          document.getElementById('stage').innerHTML == 'Waiting' &&
-          document.getElementById('me').innerHTML == ''
+          (document.getElementById('stage').innerHTML == 'Waiting' &&
+            document.getElementById('me').innerHTML == '') ||
+          document.getElementById('stage').innerHTML == 'ID重複'
         ) {
           swal('請輸入玩家名稱:', {
             content: 'input',

@@ -3,8 +3,7 @@ package game
 import (
 	"encoding/json"
 	"grizzled/database"
-	//"strings"
-	//"fmt"
+	"os"
 )
 
 type player struct {
@@ -82,7 +81,7 @@ func (this *player) playCard(choose int) {
 		Game.admission(this.Handcard[choose])
 	}
 
-	if this.Handcard[choose].Trap == true && !Game.trials.cards.Empty() {
+	if this.Handcard[choose].Trap == true && !Game.trials.cards.Empty() && os.Getenv("trap") != "0" {
 		this.Handcard = append(this.Handcard, Game.trials.cards.Pop().(database.Card))
 		this.playCard(len(this.Handcard) - 1)
 	}

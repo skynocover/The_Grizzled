@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"grizzled/database"
 	"math/rand"
+	"os"
+	"strconv"
 	"time"
 
 	DataStr "github.com/skynocover/GoStackQueue"
@@ -97,16 +99,17 @@ func (this *Tgame) InitGame() {
 
 	/*  洗牌  */
 	allCard := 48
+	trialsCard := 25
 	newCards := randCard(allCard)
 
-	for i := 0; i < 25; i++ {
+	for i := 0; i < trialsCard; i++ {
 		findcard := database.Card{}
 		database.DB.Where("ID=?", newCards[i]).Find(&findcard)
 		this.trials.cards.Push(findcard)
 	}
 	//this.trials.cards.Prt()
 
-	for j := 25; j < allCard; j++ {
+	for j := trialsCard; j < allCard; j++ {
 		findcard := database.Card{}
 		database.DB.Where("ID=?", newCards[j]).Find(&findcard)
 		this.morale.cards.Push(findcard)
@@ -123,7 +126,8 @@ func (this *Tgame) InitGame() {
 	}
 	Round.rounds = 0
 	Round.Status.SetState("pending")
-	Round.Init(3) //開始新的回合並且抽三張
+	drawNum, _ := strconv.Atoi(os.Getenv("initcard")) //設定第一回合的抽牌數
+	Round.Init(drawNum)                               //開始新的回合並且抽三張
 }
 
 func (this *Tgame) NewPlayer(id string, name string) bool {

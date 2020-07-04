@@ -58,10 +58,11 @@ func main() {
 			receive := request.Order
 			if receive == "login" {
 				if Game.NewPlayer(nsConn.Conn.ID(), request.Choose) {
+					Game.Stage = "Waiting"
 					msg.Body = Game.Render()
 					nsConn.Conn.Write(msg)
 					nsConn.Conn.Server().Broadcast(nsConn, msg)
-				}else {
+				} else {
 					Game.Stage = "ID重複"
 					msg.Body = Game.Render()
 					nsConn.Conn.Write(msg)
@@ -73,8 +74,8 @@ func main() {
 
 				case "restart": //重新開始遊戲
 					Game.InitGame()
-					Game.NoMansLand = []database.Card{}
-					Game.Stage = "Waiting"
+					//Game.NoMansLand = []database.Card{}
+					Game.Stage = "DrawCard"
 
 					msg.Body = player.Render()
 					nsConn.Conn.Write(msg)
@@ -145,9 +146,12 @@ func main() {
 					if Round.SpeechCard(player, choose) {
 						msg.Body = player.Render()
 						nsConn.Conn.Write(msg)
-						msg.Body = Game.Render()
-						nsConn.Conn.Write(msg)
-						nsConn.Conn.Server().Broadcast(nsConn, msg)
+						if Round.Status.Current() == "Mission" {
+							msg.Body = Game.Render()
+							nsConn.Conn.Write(msg)
+							nsConn.Conn.Server().Broadcast(nsConn, msg)
+						}
+
 					}
 
 				case "support": //點選支援
