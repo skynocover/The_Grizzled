@@ -119,7 +119,7 @@ func (this *player) hardKnock(card database.Card) {
 	}
 }
 
-func (this *player) checkHand(choose int, handle string) bool {
+func (this *player) checkHand(choose int, handle string) bool { //確認演說的是否和手牌相符
 
 	switch handle {
 	case "Mask":

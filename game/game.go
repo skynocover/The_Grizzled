@@ -56,7 +56,6 @@ func (this *Tgame) Render() []byte {
 			this.Threats[i] = append(this.Threats[i], Players[i].threat[j])
 		}
 	}
-	//this.PlayerNow = Players[this.order].Name
 
 	this.TM = [2]int{this.trials.cards.Len(), this.morale.cards.Len()}
 
@@ -96,6 +95,7 @@ func (this *Tgame) InitGame() {
 	this.speech = 5
 	this.trials = pile{}
 	this.morale = pile{}
+	this.NoMansLand = []database.Card{}
 
 	/*  洗牌  */
 	allCard := 48
@@ -107,7 +107,6 @@ func (this *Tgame) InitGame() {
 		database.DB.Where("ID=?", newCards[i]).Find(&findcard)
 		this.trials.cards.Push(findcard)
 	}
-	//this.trials.cards.Prt()
 
 	for j := trialsCard; j < allCard; j++ {
 		findcard := database.Card{}
@@ -115,14 +114,11 @@ func (this *Tgame) InitGame() {
 		this.morale.cards.Push(findcard)
 	}
 
-	this.NoMansLand = []database.Card{}
 	/*  抽英雄  */
 	hero := randCard(6)
 	support := randCard(16 - len(Players)*2)
 	for i := range Players {
 		Players[i].InitPlayer(hero[i], support[i])
-		//Players[i].TakeHero(hero[i])
-		//Players[i].takeSupport(support[i])
 	}
 	Round.rounds = 0
 	Round.Status.SetState("pending")
